@@ -63,7 +63,13 @@ function App() {
 
   const actualizarIsInsertandoDatos = (event) => {
     event.preventDefault();
-    setIsInsertandoDatos(true);
+
+    if (quantum === '' || memoria === '') {
+      alert('Alguno de los datos está vacío');
+    }
+    else {
+      setIsInsertandoDatos(true);
+    }
   }
    //vamos a ver
   const agregarprocesos = (nuevoproceso)=> {
@@ -372,8 +378,7 @@ function App() {
                       </div>               
                     </Form>                    
                   </Card.Text>
-                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '} 
-                  <button class="button-27" role="button">agregar </button>                                                                   
+                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '}
             </Card.Body>
           </Card> 
         </div>
