@@ -27,7 +27,7 @@ function Procesos(props) {
                         <td>{proceso.id}</td>
                         <td>{proceso.prioridad}</td>
                         <td>{proceso.duracion}</td>
-                        <td>{proceso.memoria}</td>
+                        <td>{proceso.quantum}</td>
                       </tr>
                     )
                   }

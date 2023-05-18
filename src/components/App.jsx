@@ -32,14 +32,14 @@ function App() {
   const [proceso, setProceso] = useState({
     id: '',
     prioridad: '',
-    tiempo_estimado: '',
-    quantum_asignado: ''
+    duracion: '',
+    quantum: ''
   });
   // State con la lista de procesos creados.
   const [procesos_nuevo, setNuevo] = useState([
-    { id: 1, prioridad:3, duracion: 10, memoria: 500 },
-    { id: 2, prioridad:1, duracion: 15, memoria: 1000 },
-    { id: 3, prioridad:5, duracion: 20, memoria: 1500 },
+    { id: 1, prioridad:3, duracion: 10, quantum: 5 },
+    { id: 2, prioridad:1, duracion: 15, quantum: 10 },
+    { id: 3, prioridad:5, duracion: 20, quantum: 15 },
   ]);
   const [procesos_listo, setListo] = useState([]);
   const [procesos_ejecucion, setEjecucion] = useState([]);
@@ -74,6 +74,9 @@ function App() {
     if (quantum === '' || memoria === '') {
       alert('Alguno de los datos está vacío');
     }
+    else if (quantum === 0 || memoria === 0) {
+      alert('El Quantum o la Memoria no pueden valer 0');
+    }
     else {
       setIsInsertandoDatos(true);
     }
@@ -83,36 +86,37 @@ function App() {
   const guardarCambiosProceso = (event) => {
     setProceso({
       ...proceso,
-      [event.taget.name]: event.target.value
+      [event.target.name]: event.target.value
     })
   }
 
   // Agrega el proceso creado a la lista 'Nuevo' validando los datos ingresados.
   const actualizarProcesos = (event) => {
+    event.preventDefault();
 
-    alert('hola');
-    // event.preventDefault();
+    const { id, prioridad, duracion, quantum } = proceso;
 
-    // const { id, prioridad, tiempo_estimado, quantum_asignado } = proceso;
+    if (id === '' || prioridad === '' || duracion === '' || quantum === '') {
+      alert('Rellena todos los campos del proceso a crear');
+    }
+    else if (id === '0' || prioridad === '0' || duracion === '0' || quantum === '0') {
+      alert('El ID, la Prioridad, la Duración o el Quantum no pueden valer 0');
+    }
+    else {
+      const temporal = procesos_nuevo;
 
-    // if (id === 0 || prioridad === 0 || tiempo_estimado === 0 || quantum_asignado === 0) {
-    //   alert('Rellena todos los campos del proceso a crear');
-    // }
-    // else {
-    //   const temporal = procesos_nuevo;
+      setNuevo([
+        ...temporal,
+        proceso
+      ]);
 
-    //   setNuevo([
-    //     ...temporal,
-    //     proceso
-    //   ]);
-
-    //   setProceso({
-    //     id: '',
-    //     prioridad: '',
-    //     tiempo_estimado: '',
-    //     quantum_asignado: ''
-    //   })
-    // }
+      setProceso({
+        id: '',
+        prioridad: '',
+        duracion: '',
+        quantum: ''
+      })
+    }
   };
 
   const [show, setShow] = useState(false);
@@ -126,22 +130,30 @@ function App() {
   }
 
   const cargarProcesosNuevoListo = () => {
-    var memoria_actual = memoria;
-    var numero_procesos_dentro = numero_procesos_iniciales;
-    const procesos_a_cargar = procesos_nuevo.map(proceso => {
-      if (memoria_actual - proceso.memoria >= 0)
-      {
-        memoria_actual = memoria_actual - proceso.memoria;
-        numero_procesos_dentro = numero_procesos_dentro + 1;
-        return {...proceso};
-      }
-    });
-    const procesos_orden_prioridad = ordenarProcesosPrioridad(procesos_a_cargar);
-    setNuevo([]);
-    setMemoria(memoria_actual);
-    setNumeroProcesosIniciales(numero_procesos_dentro);
-    setListo(procesos_orden_prioridad);
-    setIsTemporizadorActivado(true);
+    if (memoria === '' || quantum === '') {
+      alert('No puedes iniciar el simulador sin haber puesto antes un valor para el Quantum o la Memoria');
+    }
+    else if (quantum === 0 || memoria === 0) {
+      alert('No puedes iniciar el simulador si el valor del Quantum o Memoria es 0');
+    }
+    else {
+      var memoria_actual = memoria;
+      var numero_procesos_dentro = numero_procesos_iniciales;
+      const procesos_a_cargar = procesos_nuevo.map(proceso => {
+        if (memoria_actual - proceso.memoria >= 0)
+        {
+          memoria_actual = memoria_actual - proceso.memoria;
+          numero_procesos_dentro = numero_procesos_dentro + 1;
+          return {...proceso};
+        }
+      });
+      const procesos_orden_prioridad = ordenarProcesosPrioridad(procesos_a_cargar);
+      setNuevo([]);
+      setMemoria(memoria_actual);
+      setNumeroProcesosIniciales(numero_procesos_dentro);
+      setListo(procesos_orden_prioridad);
+      setIsTemporizadorActivado(true);
+    }
   }
   
   // TODO REVISAR CADA METODO QUE MANEJA INTERRUPCIONES, GENERAN BUGS DE RENDER
@@ -396,7 +408,8 @@ function App() {
                               onChange={actualizarQuantum}
                               value={quantum}
                               name="quantum"
-                              disabled={isInsertandoDatos}>                                
+                              disabled={isInsertandoDatos}
+                              min='0'>                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -409,7 +422,8 @@ function App() {
                               onChange={actualizarMemoria}
                               value={memoria}
                               name="memoria"
-                              disabled={isInsertandoDatos}>
+                              disabled={isInsertandoDatos}
+                              min='0'>
                             </Form.Control>
                         </div>
                       </FormGroup> 
@@ -438,7 +452,8 @@ function App() {
                               placeholder='Ej: 7'
                               onChange={guardarCambiosProceso}
                               value={proceso.id}
-                              name='id'>                                
+                              name='id'
+                              min='0'>                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -450,7 +465,8 @@ function App() {
                               placeholder='Ej: 1-5'                              
                               name='prioridad'
                               value={proceso.prioridad}
-                              onChange={guardarCambiosProceso}>
+                              onChange={guardarCambiosProceso}
+                              min='0'>
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -462,8 +478,9 @@ function App() {
                               type='number'
                               placeholder='Ej: 20'                              
                               name="duracion"
-                              value={proceso.tiempo_estimado}
-                              onChange={guardarCambiosProceso}>
+                              value={proceso.duracion}
+                              onChange={guardarCambiosProceso}
+                              min='0'>
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -474,11 +491,10 @@ function App() {
                             <Form.Control
                               type='number'
                               placeholder='Ej: 250'                              
-                              name="memoria"
-                              // SI SE ELIMINA O COMENTA ESTE ATRIBUTO DEL INPUT, SI SE PUEDE ESCRIBIR
-                              // EN EL MISMO, SI SE DEJA O DESCOMENTA, NO DEJA ESCRIBIR.
-                              //value={proceso.quantum_asignado}
-                              onChange={guardarCambiosProceso}>
+                              name="quantum"
+                              value={proceso.quantum}
+                              onChange={guardarCambiosProceso}
+                              min='0'>
                             </Form.Control>
                           </div>
                       </FormGroup>
