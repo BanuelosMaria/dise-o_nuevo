@@ -28,12 +28,19 @@ function App() {
 
   const intervalId = useRef(null);
   const [TIEMPO_TEMPORIZADOR_MS] = useState(1000);
+  // State con objeto que almacena el proceso en creación.
+  const [proceso, setProceso] = useState({
+    id: '',
+    prioridad: '',
+    tiempo_estimado: '',
+    quantum_asignado: ''
+  });
+  // State con la lista de procesos creados.
   const [procesos_nuevo, setNuevo] = useState([
     { id: 1, prioridad:3, duracion: 10, memoria: 500 },
     { id: 2, prioridad:1, duracion: 15, memoria: 1000 },
     { id: 3, prioridad:5, duracion: 20, memoria: 1500 },
   ]);
-  const [newPro, setnewPro] = useState([]);
   const [procesos_listo, setListo] = useState([]);
   const [procesos_ejecucion, setEjecucion] = useState([]);
   const [procesos_lecturadisco, setLecturaDisco] = useState([]);
@@ -71,10 +78,43 @@ function App() {
       setIsInsertandoDatos(true);
     }
   }
-   //vamos a ver
-  const agregarprocesos = (nuevoproceso)=> {
-    setNuevo([...procesos_nuevo, nuevoproceso]);
+
+  // Guarda los valores ingresados de los inputs en el state 'proceso'.
+  const guardarCambiosProceso = (event) => {
+    setProceso({
+      ...proceso,
+      [event.taget.name]: event.target.value
+    })
+  }
+
+  // Agrega el proceso creado a la lista 'Nuevo' validando los datos ingresados.
+  const actualizarProcesos = (event) => {
+
+    alert('hola');
+    // event.preventDefault();
+
+    // const { id, prioridad, tiempo_estimado, quantum_asignado } = proceso;
+
+    // if (id === 0 || prioridad === 0 || tiempo_estimado === 0 || quantum_asignado === 0) {
+    //   alert('Rellena todos los campos del proceso a crear');
+    // }
+    // else {
+    //   const temporal = procesos_nuevo;
+
+    //   setNuevo([
+    //     ...temporal,
+    //     proceso
+    //   ]);
+
+    //   setProceso({
+    //     id: '',
+    //     prioridad: '',
+    //     tiempo_estimado: '',
+    //     quantum_asignado: ''
+    //   })
+    // }
   };
+
   const [show, setShow] = useState(false);
   const handleClose = () => setShow(false);
   const handleShow = () => setShow(true);
@@ -378,7 +418,7 @@ function App() {
                       </div>               
                     </Form>                    
                   </Card.Text>
-                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '}
+                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button>
             </Card.Body>
           </Card> 
         </div>
@@ -390,14 +430,15 @@ function App() {
               <Card.Title>Procesos</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">Ingrese los siguientes procesos</Card.Subtitle>
                   <Card.Text>                    
-                    <Form >
+                    <Form onSubmit={actualizarProcesos}>
                       <FormGroup className='Datos-id'>
                         <div>
                           <Form.Label>ID</Form.Label>
                             <Form.Control type='number'
-                              placeholder='Ej: 7'                              
-                              name="id"
-                              >                                
+                              placeholder='Ej: 7'
+                              onChange={guardarCambiosProceso}
+                              value={proceso.id}
+                              name='id'>                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -407,8 +448,9 @@ function App() {
                           <Form.Label>Prioridad</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 1-5'                              
-                              name="prioridad"
-                              >                                
+                              name='prioridad'
+                              value={proceso.prioridad}
+                              onChange={guardarCambiosProceso}>
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -416,10 +458,12 @@ function App() {
                       <FormGroup className='Datos-TE'>
                         <div>
                           <Form.Label>Tiempo estimado</Form.Label>
-                            <Form.Control type='number'
+                            <Form.Control
+                              type='number'
                               placeholder='Ej: 20'                              
                               name="duracion"
-                              >                                
+                              value={proceso.tiempo_estimado}
+                              onChange={guardarCambiosProceso}>
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -427,21 +471,25 @@ function App() {
                       <FormGroup className='Datos-Quantum'>
                         <div>
                           <Form.Label>Quantum asignado</Form.Label>
-                            <Form.Control type='number'
+                            <Form.Control
+                              type='number'
                               placeholder='Ej: 250'                              
                               name="memoria"
-                              >                                
+                              // SI SE ELIMINA O COMENTA ESTE ATRIBUTO DEL INPUT, SI SE PUEDE ESCRIBIR
+                              // EN EL MISMO, SI SE DEJA O DESCOMENTA, NO DEJA ESCRIBIR.
+                              //value={proceso.quantum_asignado}
+                              onChange={guardarCambiosProceso}>
                             </Form.Control>
                           </div>
                       </FormGroup>
                       <div>
-                      <button class="button-27" role="button" type='submit' disabled={agregarprocesos}>Guardar</button>                    
+                        <button class="button-27" role="button" type='submit'>Guardar</button>                    
                       </div>               
                     </Form>                    
                   </Card.Text>                                                                 
             </Card.Body>
           </Card> 
-        </div>  
+        </div>
       </Stack>
 
         {/*Procesos-Bloqueo-final */}
