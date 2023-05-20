@@ -28,19 +28,18 @@ function App() {
 
   const intervalId = useRef(null);
   const [TIEMPO_TEMPORIZADOR_MS] = useState(1000);
-  // State con objeto que almacena el proceso en creación.
   const [proceso, setProceso] = useState({
     id: '',
     prioridad: '',
     duracion: '',
     quantum: ''
   });
-  // State con la lista de procesos creados.
   const [procesos_nuevo, setNuevo] = useState([
-    { id: 1, prioridad:3, duracion: 10, quantum: 5 },
-    { id: 2, prioridad:1, duracion: 15, quantum: 10 },
-    { id: 3, prioridad:5, duracion: 20, quantum: 15 },
+    { id: 1, prioridad:3, duracion: 10, memoria: 5 },
+    { id: 2, prioridad:1, duracion: 15, memoria: 10},
+    { id: 3, prioridad:5, duracion: 20, memoria: 15 },
   ]);
+  const [newPro, setnewPro] = useState([]);
   const [procesos_listo, setListo] = useState([]);
   const [procesos_ejecucion, setEjecucion] = useState([]);
   const [procesos_lecturadisco, setLecturaDisco] = useState([]);
@@ -60,17 +59,16 @@ function App() {
     event.target.value !== '' ?
     setQuantum(parseFloat(event.target.value)):
     setQuantum('');
-  }
+  };
 
   const actualizarMemoria = (event) => {
     event.target.value !== '' ?
     setMemoria(parseFloat(event.target.value)):
     setMemoria('');
-  }
+  };
 
   const actualizarIsInsertandoDatos = (event) => {
     event.preventDefault();
-
     if (quantum === '' || memoria === '') {
       alert('Alguno de los datos está vacío');
     }
@@ -80,26 +78,24 @@ function App() {
     else {
       setIsInsertandoDatos(true);
     }
-  }
-
-  // Guarda los valores ingresados de los inputs en el state 'proceso'.
-  const guardarCambiosProceso = (event) => {
+  };
+   //aver
+   const guardarCambiosProceso = (event) => {
     setProceso({
       ...proceso,
       [event.target.name]: event.target.value
     })
-  }
+  };
 
-  // Agrega el proceso creado a la lista 'Nuevo' validando los datos ingresados.
   const actualizarProcesos = (event) => {
     event.preventDefault();
 
     const { id, prioridad, duracion, quantum } = proceso;
 
-    if (id === '' || prioridad === '' || duracion === '' || quantum === '') {
+    if (id === '' || prioridad === '' || duracion === '' || memoria === '') {
       alert('Rellena todos los campos del proceso a crear');
     }
-    else if (id === '0' || prioridad === '0' || duracion === '0' || quantum === '0') {
+    else if (id === '0' || prioridad === '0' || duracion === '0' || memoria === '0') {
       alert('El ID, la Prioridad, la Duración o el Quantum no pueden valer 0');
     }
     else {
@@ -119,15 +115,12 @@ function App() {
     }
   };
 
-  const [show, setShow] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
   //aca cierra
   const ordenarProcesosPrioridad = (procesos_a_ordenar) => {
     const procesos_ordenados = procesos_a_ordenar.sort((proceso_1, proceso_2) => proceso_1.prioridad - proceso_2.prioridad);
 
     return procesos_ordenados;
-  }
+  };
 
   const cargarProcesosNuevoListo = () => {
     if (memoria === '' || quantum === '') {
@@ -154,7 +147,7 @@ function App() {
       setListo(procesos_orden_prioridad);
       setIsTemporizadorActivado(true);
     }
-  }
+  };
   
   // TODO REVISAR CADA METODO QUE MANEJA INTERRUPCIONES, GENERAN BUGS DE RENDER
   // * BEGIN bugs
@@ -408,8 +401,7 @@ function App() {
                               onChange={actualizarQuantum}
                               value={quantum}
                               name="quantum"
-                              disabled={isInsertandoDatos}
-                              min='0'>                                
+                              disabled={isInsertandoDatos}>                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -422,8 +414,7 @@ function App() {
                               onChange={actualizarMemoria}
                               value={memoria}
                               name="memoria"
-                              disabled={isInsertandoDatos}
-                              min='0'>
+                              disabled={isInsertandoDatos}>
                             </Form.Control>
                         </div>
                       </FormGroup> 
@@ -432,7 +423,8 @@ function App() {
                       </div>               
                     </Form>                    
                   </Card.Text>
-                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button>
+                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '} 
+                  <button class="button-27" role="button">agregar </button>                                                                   
             </Card.Body>
           </Card> 
         </div>
@@ -449,11 +441,12 @@ function App() {
                         <div>
                           <Form.Label>ID</Form.Label>
                             <Form.Control type='number'
-                              placeholder='Ej: 7'
-                              onChange={guardarCambiosProceso}
+                              placeholder='Ej: 7'                              
+                              name="id"
                               value={proceso.id}
-                              name='id'
-                              min='0'>                                
+                              onChange={guardarCambiosProceso}
+                              min='0'
+                              >                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -463,10 +456,11 @@ function App() {
                           <Form.Label>Prioridad</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 1-5'                              
-                              name='prioridad'
+                              name="prioridad"
                               value={proceso.prioridad}
                               onChange={guardarCambiosProceso}
-                              min='0'>
+                              min='0'
+                              >                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -474,13 +468,13 @@ function App() {
                       <FormGroup className='Datos-TE'>
                         <div>
                           <Form.Label>Tiempo estimado</Form.Label>
-                            <Form.Control
-                              type='number'
+                            <Form.Control type='number'
                               placeholder='Ej: 20'                              
                               name="duracion"
                               value={proceso.duracion}
                               onChange={guardarCambiosProceso}
-                              min='0'>
+                              min='0'
+                              >                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -499,13 +493,13 @@ function App() {
                           </div>
                       </FormGroup>
                       <div>
-                        <button class="button-27" role="button" type='submit'>Guardar</button>                    
+                      <button class="button-27" role="button" type='submit'>Guardar</button>                    
                       </div>               
                     </Form>                    
                   </Card.Text>                                                                 
             </Card.Body>
           </Card> 
-        </div>
+        </div>  
       </Stack>
 
         {/*Procesos-Bloqueo-final */}
