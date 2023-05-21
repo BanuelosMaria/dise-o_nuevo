@@ -2,13 +2,13 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormGroup } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import Procesos from './Procesos';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../css/App.css';
 import Header from './Headers';
 import Card from 'react-bootstrap/Card';
 import Stack from 'react-bootstrap/Stack';
 import Banner from '../components/Banner';
 import Footer from './Footer';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/App.css';
 
 function App() {
 
@@ -22,24 +22,19 @@ function App() {
           * Terminado / Salida
     */
 
-  /*
-    TODO actualizar correctamente el tiempo estimado
-  */
-
   const intervalId = useRef(null);
-  const [TIEMPO_TEMPORIZADOR_MS] = useState(1000);
+  const [TIEMPO_TEMPORIZADOR_MS] = useState(1500);
   const [proceso, setProceso] = useState({
     id: '',
     prioridad: '',
     duracion: '',
-    quantum: ''
+    memoria: ''
   });
   const [procesos_nuevo, setNuevo] = useState([
     { id: 1, prioridad:3, duracion: 10, memoria: 5 },
     { id: 2, prioridad:1, duracion: 15, memoria: 10},
     { id: 3, prioridad:5, duracion: 20, memoria: 15 },
   ]);
-  const [newPro, setnewPro] = useState([]);
   const [procesos_listo, setListo] = useState([]);
   const [procesos_ejecucion, setEjecucion] = useState([]);
   const [procesos_lecturadisco, setLecturaDisco] = useState([]);
@@ -79,18 +74,18 @@ function App() {
       setIsInsertandoDatos(true);
     }
   };
-   //aver
+
    const guardarCambiosProceso = (event) => {
     setProceso({
       ...proceso,
-      [event.target.name]: event.target.value
+      [event.target.name]: parseFloat(event.target.value)
     })
   };
 
   const actualizarProcesos = (event) => {
     event.preventDefault();
 
-    const { id, prioridad, duracion, quantum } = proceso;
+    const { id, prioridad, duracion, memoria } = proceso;
 
     if (id === '' || prioridad === '' || duracion === '' || memoria === '') {
       alert('Rellena todos los campos del proceso a crear');
@@ -110,12 +105,11 @@ function App() {
         id: '',
         prioridad: '',
         duracion: '',
-        quantum: ''
+        memoria: ''
       })
     }
   };
 
-  //aca cierra
   const ordenarProcesosPrioridad = (procesos_a_ordenar) => {
     const procesos_ordenados = procesos_a_ordenar.sort((proceso_1, proceso_2) => proceso_1.prioridad - proceso_2.prioridad);
 
@@ -149,8 +143,6 @@ function App() {
     }
   };
   
-  // TODO REVISAR CADA METODO QUE MANEJA INTERRUPCIONES, GENERAN BUGS DE RENDER
-  // * BEGIN bugs
   const eliminarInterrupcion = () => {
     if (
       procesos_lecturadisco.length > 0 ||
@@ -175,34 +167,37 @@ function App() {
   };
   
   const eliminarInterrupcionDisco = useCallback(() => {
-    const procesos_lecturadisco_actuales = [...procesos_lecturadisco];
-    const proceso_interrumpido = procesos_lecturadisco_actuales.shift();
+    const procesos_lecturadisco_actuales = procesos_lecturadisco;
+    const procesos_lecturadisco_nuevos = procesos_lecturadisco_actuales.splice(1);
+    const proceso_interrumpido = procesos_lecturadisco_actuales[0];
     const procesos_desordenados = procesos_listo.concat(proceso_interrumpido);
     const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
-  
-    setLecturaDisco(procesos_lecturadisco_actuales);
+
+    setLecturaDisco(procesos_lecturadisco_nuevos);
     setListo(procesos_ordenados);
-  }, [procesos_lecturadisco, procesos_listo]);
+  }, [procesos_listo]);
   
   const eliminarInterrupcionTeclado = useCallback(() => {
-    const procesos_teclado_actuales = [...procesos_teclado];
-    const proceso_interrumpido = procesos_teclado_actuales.shift();
+    const procesos_teclado_actuales = procesos_teclado;
+    const procesos_teclado_nuevos = procesos_teclado_actuales.splice(1);
+    const proceso_interrumpido = procesos_teclado_actuales[0];
     const procesos_desordenados = procesos_listo.concat(proceso_interrumpido);
     const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
-  
-    setTeclado(procesos_teclado_actuales);
+    
+    setTeclado(procesos_teclado_nuevos);
     setListo(procesos_ordenados);
-  }, [procesos_teclado, procesos_listo]);
+  }, [procesos_listo]);
   
   const eliminarInterrupcionImpresora = useCallback(() => {
-    const procesos_impresora_actuales = [...procesos_impresora];
-    const proceso_interrumpido = procesos_impresora_actuales.shift();
+    const procesos_impresora_actuales = procesos_impresora;
+    const procesos_impresora_nuevos = procesos_impresora_actuales.splice(1);
+    const proceso_interrumpido = procesos_impresora_actuales[0];
     const procesos_desordenados = procesos_listo.concat(proceso_interrumpido);
     const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
   
-    setImpresora(procesos_impresora_actuales);
+    setImpresora(procesos_impresora_nuevos);
     setListo(procesos_ordenados);
-  }, [procesos_impresora, procesos_listo]);
+  }, [procesos_listo]);
   
   const determinarInterrupcion = () => {
     const RANDOM_NUMBER = Math.random() * 10000;
@@ -214,8 +209,6 @@ function App() {
       interrupcionEjecucionImpresora();
     }
   };
-  
-  // * END bugs
   
   const interrupcionEjecucionDisco = useCallback(() => {
     const proceso_actual = procesos_ejecucion;
@@ -297,74 +290,60 @@ function App() {
               // ? SI EL PROCESO SE TERMINO DE EJECUTAR
               // ? SE PONE HUECO prcoesos_ejecucion, se cambia la bandera del mismo, se actualiza la memoria y se agregan estados finales
 
-              if (procesos_finalizados.length > 0)
-              setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
-              else
-              setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
-              setEjecucion([]);
-              setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
-              setIsProcesoEnEjecucion(false);
-              setMemoria(memoria_actual);
-              setTiempoEjecucion(0);
-            }
+                if (procesos_finalizados.length > 0)
+                  setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
+                else
+                  setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
+                
+                setEjecucion([]);
+                setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
+                setIsProcesoEnEjecucion(false);
+                setMemoria(memoria_actual);
+                setTiempoEjecucion(0);
+              }
         } else {
           setIsProcesoEnEjecucion(false);
           setTiempoEjecucion(0);
           setListo(procesos_ordenados);
           setEjecucion([]);
         }
-      }, [procesos_finalizados, procesos_ejecucion, tiempo_ejecucion])
-      /**
-       * else {
-        setIsProcesoEnEjecucion(false);
-        setTiempoEjecucion(0);
-      }
-       */
+      }, [procesos_finalizados, procesos_ejecucion, procesos_listo])
 
-  /**
-   * ? Acorde a la documentación pertinente, useEffect se ejecutará cada vez que se altere el DOM,
-   * ?  esto incluye cada actualización del useState() que hace que se aparezcan dichos errores
-   * ?  y tambien es mejor para la legibilidad de codigo segmentar la información...
-   * * https://dmitripavlutin.com/react-useref/
-   * * https://stackoverflow.com/questions/60131947/stopping-a-timer-in-useeffect
-   * * https://medium.com/@guptagaruda/react-hooks-understanding-component-re-renders-9708ddee9928
-   * * https://upmostly.com/tutorials/build-a-react-timer-component-using-hooks
-   */
-  
-  // TODO agregar actualizacion de valores cuando solo queda un solo proceso a ejecutar
+
+  // TODO revisar; RENDER BUGS
+  // * SI TODOS LOS PROCESOS SE ENCUENTRAN INTERRUMPIDOS Y NO HAY DENTRO DE LISTO, NO QUIERE SEGUIR ACTUALIZANDO
   useEffect(() => {
       intervalId.current = setInterval(() => {
         const RANDOM_NUMBER_1 = Math.random() * 10000;
         const RANDOM_NUMBER_2 = Math.random() * 5000;     
         if (isTemporizadorActivado) {
-            if (procesos_listo.length > 0 && isProcesoEnEjecucion === false)
+            if (procesos_listo.length >= 1 && isProcesoEnEjecucion === false)
               cargarProcesoListoEjecucion();
 
-            if (isProcesoEnEjecucion === true && tiempo_ejecucion < quantum)
+            if ((procesos_ejecucion != null || procesos_ejecucion != undefined && isProcesoEnEjecucion === true) && tiempo_ejecucion < quantum)
             {
               actualizarProcesoEjecucion();
               if (RANDOM_NUMBER_1 >= 5001 && RANDOM_NUMBER_2 <= 2500)
                 determinarInterrupcion();
             }
 
-            if (isProcesoEnEjecucion === true && tiempo_ejecucion === quantum)
+            if ((procesos_ejecucion != null || procesos_ejecucion != undefined && isProcesoEnEjecucion === true) && tiempo_ejecucion === quantum)
             {
-              actualizarProcesoEjecucion()
+              actualizarProcesoEjecucion();
               cargarProcesoListoEjecucion();
             }
             
-            eliminarInterrupcion();
-
             if (numero_procesos_finalizados >= numero_procesos_iniciales) {
               setIsTemporizadorActivado(false);
             }
+
+            eliminarInterrupcion();
           }
       }, TIEMPO_TEMPORIZADOR_MS);
       
         // Clean up the interval when the component unmounts
         return () => clearInterval(intervalId.current); 
   }, [
-    isTemporizadorActivado,
     isProcesoEnEjecucion,
     tiempo_ejecucion,
     procesos_ejecucion,
@@ -374,10 +353,11 @@ function App() {
     procesos_impresora,
     procesos_teclado,
     actualizarProcesoEjecucion,
-    cargarProcesoListoEjecucion
+    cargarProcesoListoEjecucion,
+    eliminarInterrupcion,
+    determinarInterrupcion
   ]);
 
-  // * Considerar que falta agregar formulario para escribir datos para los procesos
   return (
     <div className="App">
       <Header/>
@@ -394,7 +374,6 @@ function App() {
                     {/*formulario de memoria insertar modal para el formulario de los demas procesos */}
                     <Form onSubmit={actualizarIsInsertandoDatos}>
                       <FormGroup className='Datos-Quantum'>
-                        <div>
                           <Form.Label>Quantum</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 12'
@@ -403,11 +382,9 @@ function App() {
                               name="quantum"
                               disabled={isInsertandoDatos}>                                
                             </Form.Control>
-                          </div>
                       </FormGroup>
 
                       <FormGroup className='Datos-Memoria'>
-                        <div>
                           <Form.Label>Memoria</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 5'
@@ -416,15 +393,14 @@ function App() {
                               name="memoria"
                               disabled={isInsertandoDatos}>
                             </Form.Control>
-                        </div>
                       </FormGroup> 
                       <div>
-                      <button class="button-27" role="button" type='submit' disabled={isInsertandoDatos}>Guardar</button>                    
+                      <button className="button-27" role="button" type='submit' disabled={isInsertandoDatos}>Guardar</button>                    
                       </div>               
                     </Form>                    
                   </Card.Text>
-                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '} 
-                  <button class="button-27" role="button">agregar </button>                                                                   
+                  <button className="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '} 
+                  <button className="button-27" role="button">agregar </button>                                                                   
             </Card.Body>
           </Card> 
         </div>
@@ -438,7 +414,6 @@ function App() {
                   <Card.Text>                    
                     <Form onSubmit={actualizarProcesos}>
                       <FormGroup className='Datos-id'>
-                        <div>
                           <Form.Label>ID</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 7'                              
@@ -448,11 +423,9 @@ function App() {
                               min='0'
                               >                                
                             </Form.Control>
-                          </div>
                       </FormGroup>
 
                       <FormGroup className='Datos-prioridad'>
-                        <div>
                           <Form.Label>Prioridad</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 1-5'                              
@@ -462,11 +435,9 @@ function App() {
                               min='0'
                               >                                
                             </Form.Control>
-                          </div>
                       </FormGroup>
 
                       <FormGroup className='Datos-TE'>
-                        <div>
                           <Form.Label>Tiempo estimado</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 20'                              
@@ -476,24 +447,21 @@ function App() {
                               min='0'
                               >                                
                             </Form.Control>
-                          </div>
                       </FormGroup>
 
-                      <FormGroup className='Datos-Quantum'>
-                        <div>
-                          <Form.Label>Quantum asignado</Form.Label>
+                      <FormGroup className='Datos-Memoria'>
+                          <Form.Label>Memoria asignada</Form.Label>
                             <Form.Control
                               type='number'
                               placeholder='Ej: 250'                              
-                              name="quantum"
-                              value={proceso.quantum}
+                              name="memoria"
+                              value={proceso.memoria}
                               onChange={guardarCambiosProceso}
                               min='0'>
                             </Form.Control>
-                          </div>
                       </FormGroup>
                       <div>
-                      <button class="button-27" role="button" type='submit'>Guardar</button>                    
+                      <button className="button-27" role="button" type='submit'>Guardar</button>                    
                       </div>               
                     </Form>                    
                   </Card.Text>                                                                 
