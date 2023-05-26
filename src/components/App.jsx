@@ -15,6 +15,7 @@ function App() {
 
   const intervalId = useRef(null);
   const [TIEMPO_TEMPORIZADOR_MS] = useState(1000);
+  const [contador_detonante_interupciones, setContadorDetonanteInterrupciones] = useState(0);
   const [proceso, setProceso] = useState({
     id: '',
     prioridad: '',
@@ -117,7 +118,6 @@ function App() {
   
     setNuevo([...procesos_nuevo, nuevoProceso]);
   };
-
 
   //aca cierra
   const ordenarProcesosPrioridad = (procesos_a_ordenar) => {
@@ -225,14 +225,14 @@ function App() {
     const proceso_actual = procesos_ejecucion;
       
       if (procesos_lecturadisco.length >= 1) {
-        setLecturaDisco([...procesos_lecturadisco, proceso_actual[0]]);
         setEjecucion([]);
         setIsProcesoEnEjecucion(false);
+        setLecturaDisco([...procesos_lecturadisco, proceso_actual[0]]);
       }
       else {
-        setLecturaDisco([proceso_actual[0]]);
         setEjecucion([]);
         setIsProcesoEnEjecucion(false);
+        setLecturaDisco([proceso_actual[0]]);
       }
     }, [procesos_ejecucion, isProcesoEnEjecucion])
   
@@ -241,13 +241,13 @@ function App() {
   
       if (procesos_teclado.length >= 1) {
         setEjecucion([]);
-        setTeclado([...procesos_teclado, proceso_actual[0]]);    
         setIsProcesoEnEjecucion(false);
+        setTeclado([...procesos_teclado, proceso_actual[0]]);    
       }
       else {
         setEjecucion([]);
-        setTeclado([proceso_actual[0]]);
         setIsProcesoEnEjecucion(false);
+        setTeclado([proceso_actual[0]]);
       }
     }, [procesos_ejecucion, isProcesoEnEjecucion])
 
@@ -256,14 +256,14 @@ function App() {
   
       if (procesos_impresora.length >= 1)
       {
-        setImpresora([...procesos_teclado, proceso_actual[0]]);
         setEjecucion([]);
         setIsProcesoEnEjecucion(false);
+        setImpresora([...procesos_teclado, proceso_actual[0]]);
       }
       else {
-        setImpresora([proceso_actual[0]]);
         setEjecucion([]);
         setIsProcesoEnEjecucion(false);
+        setImpresora([proceso_actual[0]]);
       }
     }, [procesos_ejecucion, isProcesoEnEjecucion])
 
@@ -272,10 +272,15 @@ function App() {
       const proceso_actual = procesos_listos_actuales[0];
       const nuevos_procesos_listo = procesos_listos_actuales.splice(1)
   
-      setEjecucion([proceso_actual]);
-      setListo(nuevos_procesos_listo);
-      setIsProcesoEnEjecucion(true);
-    }, [procesos_listo]) 
+      if (procesos_listo.length === 0) {
+        console.error('No more processes to load.');
+        return;
+      } else {
+        setEjecucion([proceso_actual]);
+        setIsProcesoEnEjecucion(true);
+        setListo(nuevos_procesos_listo);
+      }
+    }, [procesos_listo, procesos_ejecucion]) 
      
   const actualizarProcesoEjecucion = useCallback(() => {
         const proceso_actual = procesos_ejecucion[0];
@@ -293,65 +298,75 @@ function App() {
             if (duracion_actual > 0){
               // ? SI LA duracion_actual del proceso en ejecución es mayor a 0...
               // ?  reescribir la duracion del proceso en ejecución
-              setIsProcesoEnEjecucion(true);
-              setTiempoEjecucion(tiempo_ejecucion);
               setEjecucion([{...proceso_actual, duracion: duracion_actual}]);
+              setIsProcesoEnEjecucion(true);
+              setTiempoEjecucion(tiempo_ejecucion_actual);
             }
             else {
               // ? SI EL PROCESO SE TERMINO DE EJECUTAR
               // ? SE PONE HUECO prcoesos_ejecucion, se cambia la bandera del mismo, se actualiza la memoria y se agregan estados finales
 
               if (procesos_finalizados.length > 0)
-              setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
+                setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
               else
-              setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
+                setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
               setEjecucion([]);
-              setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
               setIsProcesoEnEjecucion(false);
               setMemoria(memoria_actual);
+              setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
               setTiempoEjecucion(0);
             }
         } else {
-          setIsProcesoEnEjecucion(false);
-          setTiempoEjecucion(0);
-          setListo(procesos_ordenados);
           setEjecucion([]);
+          setIsProcesoEnEjecucion(false);
+          setListo(procesos_ordenados);
+          setTiempoEjecucion(0);
         }
       }, [procesos_finalizados, procesos_ejecucion, tiempo_ejecucion])
  
   // TODO agregar actualizacion de valores cuando solo queda un solo proceso a ejecutar
-  useEffect(() => {
-      intervalId.current = setInterval(() => {
+useEffect(() => {
+    intervalId.current = setInterval(() => {
         const RANDOM_NUMBER_1 = Math.random() * 10000;
-        const RANDOM_NUMBER_2 = Math.random() * 5000;     
+        const RANDOM_NUMBER_2 = Math.random() * 5000;
         if (isTemporizadorActivado) {
             if (procesos_listo.length > 0 && isProcesoEnEjecucion === false)
-              cargarProcesoListoEjecucion();
+                cargarProcesoListoEjecucion();
 
-            if (isProcesoEnEjecucion === true && tiempo_ejecucion < quantum)
-            {
-              actualizarProcesoEjecucion();
-              if (RANDOM_NUMBER_1 >= 5001 && RANDOM_NUMBER_2 <= 2500)
-                determinarInterrupcion();
+            if (isProcesoEnEjecucion) {
+                if (tiempo_ejecucion < quantum) {
+                    actualizarProcesoEjecucion();
+                    if (contador_detonante_interupciones >=3) {
+                        if (RANDOM_NUMBER_1 >= 5001 && RANDOM_NUMBER_2 <= 2500)
+                            determinarInterrupcion();
+                    }
+                } else if (tiempo_ejecucion === quantum) {
+                    actualizarProcesoEjecucion()
+                    cargarProcesoListoEjecucion();
+                }
             }
 
-            if (isProcesoEnEjecucion === true && tiempo_ejecucion === quantum)
-            {
-              actualizarProcesoEjecucion()
-              cargarProcesoListoEjecucion();
-            }
-            
-            eliminarInterrupcion();
+            if (contador_detonante_interupciones >=1)
+                eliminarInterrupcion();
 
             if (numero_procesos_finalizados >= numero_procesos_iniciales) {
-              setIsTemporizadorActivado(false);
+                setIsTemporizadorActivado(false);
             }
-          }
-      }, TIEMPO_TEMPORIZADOR_MS);
+
+        }
+
+        setContadorDetonanteInterrupciones(contador_detonante_interupciones + 1);
+
+        //Clean up if no more processes are left
+        if (!isTemporizadorActivado && procesos_listo.length === 0) {
+            clearInterval(intervalId.current);
+        }
+
+    }, TIEMPO_TEMPORIZADOR_MS);
       
-        // Clean up the interval when the component unmounts
-        return () => clearInterval(intervalId.current); 
-  }, [
+    // Clean up the interval when the component unmounts
+    return () => clearInterval(intervalId.current); 
+}, [
     isTemporizadorActivado,
     isProcesoEnEjecucion,
     tiempo_ejecucion,
@@ -362,8 +377,10 @@ function App() {
     procesos_impresora,
     procesos_teclado,
     actualizarProcesoEjecucion,
-    cargarProcesoListoEjecucion
-  ]);
+    cargarProcesoListoEjecucion,
+    determinarInterrupcion
+]);
+
 
   // * Considerar que falta agregar formulario para escribir datos para los procesos
   return (
