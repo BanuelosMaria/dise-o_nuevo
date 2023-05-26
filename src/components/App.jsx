@@ -2,28 +2,19 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { FormGroup } from 'react-bootstrap';
 import Form from 'react-bootstrap/Form';
 import Procesos from './Procesos';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '../css/App.css';
 import Header from './Headers';
 import Card from 'react-bootstrap/Card';
 import Stack from 'react-bootstrap/Stack';
 import Banner from '../components/Banner';
 import Footer from './Footer';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import '../css/App.css';
 
 function App() {
 
-    /* 
-      * IMPORTANTE:
-        * 5 tablas:
-          * Nuevo
-          * Listo
-          * Ejecutando
-          * Bloqueado
-          * Terminado / Salida
-    */
 
   const intervalId = useRef(null);
-  const [TIEMPO_TEMPORIZADOR_MS] = useState(1500);
+  const [TIEMPO_TEMPORIZADOR_MS] = useState(1000);
   const [proceso, setProceso] = useState({
     id: '',
     prioridad: '',
@@ -74,7 +65,8 @@ function App() {
       setIsInsertandoDatos(true);
     }
   };
-
+   //aver
+   //Aver x2
    const guardarCambiosProceso = (event) => {
     setProceso({
       ...proceso,
@@ -102,14 +94,32 @@ function App() {
       ]);
 
       setProceso({
-        id: '',
-        prioridad: '',
-        duracion: '',
-        memoria: ''
+        id: id,
+        prioridad: prioridad,
+        duracion: duracion,
+        memoria: memoria
       })
     }
   };
+   //aca termina 
+   const crearProcesoAleatorio = () => {
+    const id = Math.floor(Math.random() * 1000) + 1;
+    const prioridad = Math.floor(Math.random() * 5) + 1;
+    const duracion = Math.floor(Math.random() * 30) + 1;
+    const memoria = Math.floor(Math.random() * 20) + 1;
+  
+    const nuevoProceso = {
+      id: id,
+      prioridad: prioridad,
+      duracion: duracion,
+      memoria: memoria
+    };
+  
+    setNuevo([...procesos_nuevo, nuevoProceso]);
+  };
 
+
+  //aca cierra
   const ordenarProcesosPrioridad = (procesos_a_ordenar) => {
     const procesos_ordenados = procesos_a_ordenar.sort((proceso_1, proceso_2) => proceso_1.prioridad - proceso_2.prioridad);
 
@@ -143,22 +153,24 @@ function App() {
     }
   };
   
+  // TODO REVISAR CADA METODO QUE MANEJA INTERRUPCIONES, GENERAN BUGS DE RENDER
+  // * BEGIN bugs
   const eliminarInterrupcion = () => {
     if (
       procesos_lecturadisco.length > 0 ||
       procesos_teclado.length > 0 ||
       procesos_impresora.length > 0
     ) {
-      const RANDOM_NUMBER = Math.random() * 10000;
-      if (RANDOM_NUMBER >= 0 && RANDOM_NUMBER <= 2500) {
+      const RANDOM_NUMBER = Math.random() * 10;
+      if (RANDOM_NUMBER >= 0 && RANDOM_NUMBER <= 25) {
         if (procesos_lecturadisco.length > 0) {
           eliminarInterrupcionDisco();
         }
-      } else if (RANDOM_NUMBER >= 2501 && RANDOM_NUMBER <= 5000) {
+      } else if (RANDOM_NUMBER >= 26 && RANDOM_NUMBER <= 50) {
         if (procesos_teclado.length > 0) {
           eliminarInterrupcionTeclado();
         }
-      } else if (RANDOM_NUMBER >= 5001 && RANDOM_NUMBER <= 7500) {
+      } else if (RANDOM_NUMBER >= 51 && RANDOM_NUMBER <= 75) {
         if (procesos_impresora.length > 0) {
           eliminarInterrupcionImpresora();
         }
@@ -167,48 +179,47 @@ function App() {
   };
   
   const eliminarInterrupcionDisco = useCallback(() => {
-    const procesos_lecturadisco_actuales = procesos_lecturadisco;
-    const procesos_lecturadisco_nuevos = procesos_lecturadisco_actuales.splice(1);
-    const proceso_interrumpido = procesos_lecturadisco_actuales[0];
+    const procesos_lecturadisco_actuales = [...procesos_lecturadisco];
+    const proceso_interrumpido = procesos_lecturadisco_actuales.shift();
     const procesos_desordenados = procesos_listo.concat(proceso_interrumpido);
     const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
-
-    setLecturaDisco(procesos_lecturadisco_nuevos);
+  
+    setLecturaDisco(procesos_lecturadisco_actuales);
     setListo(procesos_ordenados);
-  }, [procesos_listo]);
+  }, [procesos_lecturadisco, procesos_listo]);
   
   const eliminarInterrupcionTeclado = useCallback(() => {
-    const procesos_teclado_actuales = procesos_teclado;
-    const procesos_teclado_nuevos = procesos_teclado_actuales.splice(1);
-    const proceso_interrumpido = procesos_teclado_actuales[0];
+    const procesos_teclado_actuales = [...procesos_teclado];
+    const proceso_interrumpido = procesos_teclado_actuales.shift();
     const procesos_desordenados = procesos_listo.concat(proceso_interrumpido);
     const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
-    
-    setTeclado(procesos_teclado_nuevos);
+  
+    setTeclado(procesos_teclado_actuales);
     setListo(procesos_ordenados);
-  }, [procesos_listo]);
+  }, [procesos_teclado, procesos_listo]);
   
   const eliminarInterrupcionImpresora = useCallback(() => {
-    const procesos_impresora_actuales = procesos_impresora;
-    const procesos_impresora_nuevos = procesos_impresora_actuales.splice(1);
-    const proceso_interrumpido = procesos_impresora_actuales[0];
+    const procesos_impresora_actuales = [...procesos_impresora];
+    const proceso_interrumpido = procesos_impresora_actuales.shift();
     const procesos_desordenados = procesos_listo.concat(proceso_interrumpido);
     const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
   
-    setImpresora(procesos_impresora_nuevos);
+    setImpresora(procesos_impresora_actuales);
     setListo(procesos_ordenados);
-  }, [procesos_listo]);
+  }, [procesos_impresora, procesos_listo]);
   
   const determinarInterrupcion = () => {
-    const RANDOM_NUMBER = Math.random() * 10000;
-    if (RANDOM_NUMBER >= 0 && RANDOM_NUMBER <= 2500) {
+    const RANDOM_NUMBER = Math.random() * 1000000;
+    if (RANDOM_NUMBER >= 0 && RANDOM_NUMBER <= 250000) {
       interrupcionEjecucionDisco();
-    } else if (RANDOM_NUMBER >= 2501 && RANDOM_NUMBER <= 5000) {
+    } else if (RANDOM_NUMBER >= 250001 && RANDOM_NUMBER <= 500000) {
       interrupcionEjecucionTeclado();
-    } else if (RANDOM_NUMBER >= 5001 && RANDOM_NUMBER <= 7500) {
+    } else if (RANDOM_NUMBER >= 500001 && RANDOM_NUMBER <= 750000) {
       interrupcionEjecucionImpresora();
     }
   };
+  
+  // * END bugs
   
   const interrupcionEjecucionDisco = useCallback(() => {
     const proceso_actual = procesos_ejecucion;
@@ -290,60 +301,58 @@ function App() {
               // ? SI EL PROCESO SE TERMINO DE EJECUTAR
               // ? SE PONE HUECO prcoesos_ejecucion, se cambia la bandera del mismo, se actualiza la memoria y se agregan estados finales
 
-                if (procesos_finalizados.length > 0)
-                  setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
-                else
-                  setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
-                
-                setEjecucion([]);
-                setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
-                setIsProcesoEnEjecucion(false);
-                setMemoria(memoria_actual);
-                setTiempoEjecucion(0);
-              }
+              if (procesos_finalizados.length > 0)
+              setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
+              else
+              setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
+              setEjecucion([]);
+              setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
+              setIsProcesoEnEjecucion(false);
+              setMemoria(memoria_actual);
+              setTiempoEjecucion(0);
+            }
         } else {
           setIsProcesoEnEjecucion(false);
           setTiempoEjecucion(0);
           setListo(procesos_ordenados);
           setEjecucion([]);
         }
-      }, [procesos_finalizados, procesos_ejecucion, procesos_listo])
-
-
-  // TODO revisar; RENDER BUGS
-  // * SI TODOS LOS PROCESOS SE ENCUENTRAN INTERRUMPIDOS Y NO HAY DENTRO DE LISTO, NO QUIERE SEGUIR ACTUALIZANDO
+      }, [procesos_finalizados, procesos_ejecucion, tiempo_ejecucion])
+ 
+  // TODO agregar actualizacion de valores cuando solo queda un solo proceso a ejecutar
   useEffect(() => {
       intervalId.current = setInterval(() => {
         const RANDOM_NUMBER_1 = Math.random() * 10000;
         const RANDOM_NUMBER_2 = Math.random() * 5000;     
         if (isTemporizadorActivado) {
-            if (procesos_listo.length >= 1 && isProcesoEnEjecucion === false)
+            if (procesos_listo.length > 0 && isProcesoEnEjecucion === false)
               cargarProcesoListoEjecucion();
 
-            if ((procesos_ejecucion != null || procesos_ejecucion != undefined && isProcesoEnEjecucion === true) && tiempo_ejecucion < quantum)
+            if (isProcesoEnEjecucion === true && tiempo_ejecucion < quantum)
             {
               actualizarProcesoEjecucion();
               if (RANDOM_NUMBER_1 >= 5001 && RANDOM_NUMBER_2 <= 2500)
                 determinarInterrupcion();
             }
 
-            if ((procesos_ejecucion != null || procesos_ejecucion != undefined && isProcesoEnEjecucion === true) && tiempo_ejecucion === quantum)
+            if (isProcesoEnEjecucion === true && tiempo_ejecucion === quantum)
             {
-              actualizarProcesoEjecucion();
+              actualizarProcesoEjecucion()
               cargarProcesoListoEjecucion();
             }
             
+            eliminarInterrupcion();
+
             if (numero_procesos_finalizados >= numero_procesos_iniciales) {
               setIsTemporizadorActivado(false);
             }
-
-            eliminarInterrupcion();
           }
       }, TIEMPO_TEMPORIZADOR_MS);
       
         // Clean up the interval when the component unmounts
         return () => clearInterval(intervalId.current); 
   }, [
+    isTemporizadorActivado,
     isProcesoEnEjecucion,
     tiempo_ejecucion,
     procesos_ejecucion,
@@ -353,11 +362,10 @@ function App() {
     procesos_impresora,
     procesos_teclado,
     actualizarProcesoEjecucion,
-    cargarProcesoListoEjecucion,
-    eliminarInterrupcion,
-    determinarInterrupcion
+    cargarProcesoListoEjecucion
   ]);
 
+  // * Considerar que falta agregar formulario para escribir datos para los procesos
   return (
     <div className="App">
       <Header/>
@@ -374,6 +382,7 @@ function App() {
                     {/*formulario de memoria insertar modal para el formulario de los demas procesos */}
                     <Form onSubmit={actualizarIsInsertandoDatos}>
                       <FormGroup className='Datos-Quantum'>
+                        <div>
                           <Form.Label>Quantum</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 12'
@@ -382,9 +391,11 @@ function App() {
                               name="quantum"
                               disabled={isInsertandoDatos}>                                
                             </Form.Control>
+                          </div>
                       </FormGroup>
 
                       <FormGroup className='Datos-Memoria'>
+                        <div>
                           <Form.Label>Memoria</Form.Label>
                             <Form.Control type='number'
                               placeholder='Ej: 5'
@@ -393,14 +404,16 @@ function App() {
                               name="memoria"
                               disabled={isInsertandoDatos}>
                             </Form.Control>
+                        </div>
                       </FormGroup> 
                       <div>
-                      <button className="button-27" role="button" type='submit' disabled={isInsertandoDatos}>Guardar</button>                    
+                      <button class="button-27" role="button" type='submit' disabled={isInsertandoDatos}>Guardar</button>                    
                       </div>               
                     </Form>                    
                   </Card.Text>
-                  <button className="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '} 
-                  <button className="button-27" role="button">agregar </button>                                                                   
+                  <button class="button-27" role="button" onClick={() => cargarProcesosNuevoListo()}>Iniciar</button> {' '}{' '} 
+                  <button class="button-27" role="button" onClick={crearProcesoAleatorio}>Crear Proceso Aleatorio</button>
+
             </Card.Body>
           </Card> 
         </div>
@@ -468,6 +481,8 @@ function App() {
             </Card.Body>
           </Card> 
         </div>  
+
+ 
       </Stack>
 
         {/*Procesos-Bloqueo-final */}

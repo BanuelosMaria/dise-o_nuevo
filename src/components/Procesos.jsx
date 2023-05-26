@@ -9,7 +9,7 @@ function Procesos(props) {
     return (
         <>
         {
-            procesos.length > 0 && procesos != undefined ? (
+            procesos.length > 0 ? (
               <div className='Procesos'>
                 <Table striped bordered hover>
                   <thead>
@@ -17,7 +17,7 @@ function Procesos(props) {
                       <th>ID Proceso</th>
                       <th>Prioridad</th>
                       <th>Tiempo estimado</th>
-                      <th>Memoria asignada</th>
+                      <th>Quantum asignado</th>
                     </tr>
                   </thead>
                   <tbody>
