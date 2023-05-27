@@ -40,19 +40,6 @@ function App() {
   const [isTemporizadorActivado, setIsTemporizadorActivado] = useState(false);
   const [isProcesoEnEjecucion, setIsProcesoEnEjecucion] = useState(false);
 
-  const sumaMemoriaProcesosMayorSistema = () => {
-    let suma = 0;
-    procesos_nuevo.forEach((proceso) => {
-      suma = suma + proceso.memoria;
-    });
-
-    if (memoria < suma) {
-      return true;
-    }
-
-    return false;
-  }
-
   const actualizarQuantum = (event) => {
     event.target.value !== ""
       ? setQuantum(parseFloat(event.target.value))
@@ -75,11 +62,6 @@ function App() {
     }
     if (quantum === 0 || memoria === 0) {
       alert("El Quantum o la Memoria no pueden valer 0");
-
-      return;
-    }
-    if (sumaMemoriaProcesosMayorSistema) {
-      alert("El simulador no puede comenzar en este momento");
 
       return;
     }
@@ -164,7 +146,12 @@ function App() {
       return;
     }
 
-    if (sumaMemoriaProcesosMayorSistema) {
+    let suma = 0;
+    procesos_nuevo.forEach((proceso) => {
+      suma = suma + proceso.memoria;
+    });
+
+    if (memoria < suma) {
       alert("El simulador no puede comenzar en este momento");
 
       return;
@@ -185,7 +172,7 @@ function App() {
     setMemoria(memoria_actual);
     setNumeroProcesosIniciales(numero_procesos_dentro);
     setListo(procesos_orden_prioridad);
-    //setIsTemporizadorActivado(true);
+    setIsTemporizadorActivado(true);
   };
 
   // TODO REVISAR CADA METODO QUE MANEJA INTERRUPCIONES, GENERAN BUGS DE RENDER
