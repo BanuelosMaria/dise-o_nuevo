@@ -389,7 +389,9 @@ function App() {
                               onChange={actualizarQuantum}
                               value={quantum}
                               name="quantum"
-                              disabled={isInsertandoDatos}>                                
+                              disabled={isInsertandoDatos}
+                              min="1"
+                            >                                
                             </Form.Control>
                           </div>
                       </FormGroup>
@@ -402,7 +404,9 @@ function App() {
                               onChange={actualizarMemoria}
                               value={memoria}
                               name="memoria"
-                              disabled={isInsertandoDatos}>
+                              disabled={isInsertandoDatos}
+                              min="1"
+                            >
                             </Form.Control>
                         </div>
                       </FormGroup> 
@@ -433,7 +437,7 @@ function App() {
                               name="id"
                               value={proceso.id}
                               onChange={guardarCambiosProceso}
-                              min='0'
+                              min='1'
                               >                                
                             </Form.Control>
                       </FormGroup>
@@ -445,7 +449,7 @@ function App() {
                               name="prioridad"
                               value={proceso.prioridad}
                               onChange={guardarCambiosProceso}
-                              min='0'
+                              min='1'
                               >                                
                             </Form.Control>
                       </FormGroup>
@@ -457,7 +461,7 @@ function App() {
                               name="duracion"
                               value={proceso.duracion}
                               onChange={guardarCambiosProceso}
-                              min='0'
+                              min='1'
                               >                                
                             </Form.Control>
                       </FormGroup>
@@ -470,7 +474,7 @@ function App() {
                               name="memoria"
                               value={proceso.memoria}
                               onChange={guardarCambiosProceso}
-                              min='0'>
+                              min='1'>
                             </Form.Control>
                       </FormGroup>
                       <div>
