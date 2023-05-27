@@ -12,8 +12,7 @@ import Footer from "./Footer";
 
 function App() {
   const intervalId = useRef(null);
-  const [TIEMPO_TEMPORIZADOR_MS] = useState(1000);
-  const [contador_detonante_interupciones, setContadorDetonanteInterrupciones] = useState(0);
+  const [TIEMPO_TEMPORIZADOR_MS] = useState(1500);
   const [proceso, setProceso] = useState({
     id: "",
     prioridad: "",
@@ -21,9 +20,9 @@ function App() {
     memoria: "",
   });
   const [procesos_nuevo, setNuevo] = useState([
-    { id: 1, prioridad: 3, duracion: 10, memoria: 5 },
-    { id: 2, prioridad: 1, duracion: 15, memoria: 10 },
-    { id: 3, prioridad: 5, duracion: 20, memoria: 15 },
+    { id: 1, prioridad: 3, duracion: 5, memoria: 5 },
+    { id: 2, prioridad: 1, duracion: 10, memoria: 10 },
+    { id: 3, prioridad: 5, duracion: 3, memoria: 15 },
   ]);
   const [procesos_listo, setListo] = useState([]);
   const [procesos_ejecucion, setEjecucion] = useState([]);
@@ -32,14 +31,15 @@ function App() {
   const [procesos_impresora, setImpresora] = useState([]);
   const [procesos_finalizados, setFinalizados] = useState([]);
   const [numero_procesos_iniciales, setNumeroProcesosIniciales] = useState(0);
-  const [numero_procesos_finalizados, setNumeroProcesosFinalizados] =
-    useState(0);
+  const [numero_procesos_finalizados, setNumeroProcesosFinalizados] = useState(0);
   const [quantum, setQuantum] = useState("");
   const [memoria, setMemoria] = useState("");
+  const [tiempo_segundos, setTiempoSegundos] = useState(0);
   const [tiempo_ejecucion, setTiempoEjecucion] = useState(0);
   const [isInsertandoDatos, setIsInsertandoDatos] = useState(false);
   const [isTemporizadorActivado, setIsTemporizadorActivado] = useState(false);
   const [isProcesoEnEjecucion, setIsProcesoEnEjecucion] = useState(false);
+  const [isProcesoEnBloqueo, setIsProcesoEnBloqueo] = useState(false);
 
   const actualizarQuantum = (event) => {
     event.target.value !== ""
@@ -184,16 +184,16 @@ function App() {
       procesos_teclado.length > 0 ||
       procesos_impresora.length > 0
     ) {
-      const RANDOM_NUMBER = Math.random() * 10;
-      if (RANDOM_NUMBER >= 0 && RANDOM_NUMBER <= 25) {
+      const RANDOM_NUMBER = Math.random() * 1000000;
+      if (RANDOM_NUMBER >= 0 && RANDOM_NUMBER <= 250000) {
         if (procesos_lecturadisco.length > 0) {
           eliminarInterrupcionDisco();
         }
-      } else if (RANDOM_NUMBER >= 26 && RANDOM_NUMBER <= 50) {
+      } else if (RANDOM_NUMBER >= 250001 && RANDOM_NUMBER <= 500000) {
         if (procesos_teclado.length > 0) {
           eliminarInterrupcionTeclado();
         }
-      } else if (RANDOM_NUMBER >= 51 && RANDOM_NUMBER <= 75) {
+      } else if (RANDOM_NUMBER >= 500001 && RANDOM_NUMBER <= 750000) {
         if (procesos_impresora.length > 0) {
           eliminarInterrupcionImpresora();
         }
@@ -298,7 +298,7 @@ function App() {
       setEjecucion([proceso_actual]);
       setListo(nuevos_procesos_listo);
       setIsProcesoEnEjecucion(true);
-    }, [procesos_listo]) 
+    }, [procesos_listo, procesos_lecturadisco, procesos_impresora, procesos_teclado]) 
      
   const actualizarProcesoEjecucion = useCallback(() => {
         const proceso_actual = procesos_ejecucion[0];
@@ -308,69 +308,90 @@ function App() {
         const procesos_listos_actuales = procesos_listo;
         const procesos_desordenados = procesos_listos_actuales.concat({...proceso_actual, duracion: duracion_actual});
         const procesos_ordenados = ordenarProcesosPrioridad(procesos_desordenados);
-        const numero_procesos_finalizados_actual = numero_procesos_finalizados - 1;
+        const numero_procesos_finalizados_actual = numero_procesos_finalizados + 1;
     
         // * REVISION SOBRE TIEMPO DEL PROCESO Y EL QUANTUM GLOBAL
-        if (tiempo_ejecucion_actual <= quantum) {
+        if (tiempo_ejecucion_actual <= quantum-1) {
             // ? SI ES MAYOR QUE quantum...
             if (duracion_actual > 0){
               // ? SI LA duracion_actual del proceso en ejecución es mayor a 0...
               // ?  reescribir la duracion del proceso en ejecución
               setIsProcesoEnEjecucion(true);
-              setTiempoEjecucion(tiempo_ejecucion);
+              setTiempoEjecucion(tiempo_ejecucion_actual);
+
+              const RANDOM_NUMBER_1 = Math.random() * 10000;
+              const RANDOM_NUMBER_2 = Math.random() * 5000;
+
+              eliminarInterrupcion();
+
               setEjecucion([{...proceso_actual, duracion: duracion_actual}]);
+              
+              if (RANDOM_NUMBER_1 >= 5001 && RANDOM_NUMBER_2 <= 2500)
+              {
+                determinarInterrupcion()
+                setTiempoEjecucion(0);  
+              }
+
             }
             else {
               // ? SI EL PROCESO SE TERMINO DE EJECUTAR
               // ? SE PONE HUECO prcoesos_ejecucion, se cambia la bandera del mismo, se actualiza la memoria y se agregan estados finales
+              setEjecucion([]);
 
               if (procesos_finalizados.length > 0)
-              setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: duracion_actual}]);
+                setFinalizados([...procesos_finalizados , {...proceso_actual, duracion: 0}]);
               else
-              setFinalizados([{...proceso_actual, duracion: duracion_actual}]);
-              setEjecucion([]);
-              setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
+                setFinalizados([{...proceso_actual, duracion: 0}]);
+              
               setIsProcesoEnEjecucion(false);
+              setTiempoEjecucion(0);          
+              setNumeroProcesosFinalizados(numero_procesos_finalizados_actual);
               setMemoria(memoria_actual);
-              setTiempoEjecucion(0);
             }
         } else {
+          setEjecucion([]);
           setIsProcesoEnEjecucion(false);
           setTiempoEjecucion(0);
           setListo(procesos_ordenados);
-          setEjecucion([]);
         }
-      }, [procesos_finalizados, procesos_ejecucion, tiempo_ejecucion])
+      }, [procesos_finalizados, procesos_ejecucion, tiempo_ejecucion, isProcesoEnEjecucion])
  
-  // TODO agregar actualizacion de valores cuando solo queda un solo proceso a ejecutar
   useEffect(() => {
-      intervalId.current = setInterval(() => {
-        const RANDOM_NUMBER_1 = Math.random() * 10000;
-        const RANDOM_NUMBER_2 = Math.random() * 5000;     
+      intervalId.current = setInterval(() => {     
+        
         if (isTemporizadorActivado) {
-            if (procesos_listo.length > 0 && isProcesoEnEjecucion === false)
-              cargarProcesoListoEjecucion();
+          
+          setTiempoSegundos(tiempo_segundos + 1);
 
-            if (isProcesoEnEjecucion === true && tiempo_ejecucion < quantum)
+          // * Si hay algun proceso en Listo, y no hay ningun proceso dentro de Ejecución...
+          if (procesos_listo.length > 0 && isProcesoEnEjecucion === false)
+              cargarProcesoListoEjecucion();
+          else if (procesos_listo.length === 0 && isProcesoEnEjecucion === false)
             {
-              actualizarProcesoEjecucion();
-              if (RANDOM_NUMBER_1 >= 5001 && RANDOM_NUMBER_2 <= 2500)
-                determinarInterrupcion();
+              if (procesos_lecturadisco.length > 0) {
+                eliminarInterrupcionDisco();
+              }
+              if (procesos_teclado.length > 0) {
+                eliminarInterrupcionTeclado();
+              }
+              if (procesos_impresora.length > 0) {
+                eliminarInterrupcionImpresora();
+              }
             }
 
-            if (isProcesoEnEjecucion === true && tiempo_ejecucion === quantum)
+              // * Si hay proceso dentro de Ejecución, y su tiempo dentro de Ejecución no pasa del Quantum
+            if (isProcesoEnEjecucion === true && tiempo_ejecucion <= quantum-1)
             {
-              actualizarProcesoEjecucion()
-              cargarProcesoListoEjecucion();
+              actualizarProcesoEjecucion();    
             }
-            
-            eliminarInterrupcion();
+          
+
 
             if (numero_procesos_finalizados >= numero_procesos_iniciales) {
               setIsTemporizadorActivado(false);
             }
           }
-      }, TIEMPO_TEMPORIZADOR_MS);
+        }, TIEMPO_TEMPORIZADOR_MS);
       
         // Clean up the interval when the component unmounts
         return () => clearInterval(intervalId.current); 
@@ -388,8 +409,6 @@ function App() {
     cargarProcesoListoEjecucion
   ]);
 
-
-  // * Considerar que falta agregar formulario para escribir datos para los procesos
   return (
     <div className="App">
       <Header />
