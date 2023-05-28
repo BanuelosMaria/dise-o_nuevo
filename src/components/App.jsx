@@ -9,6 +9,11 @@ import Card from "react-bootstrap/Card";
 import Stack from "react-bootstrap/Stack";
 import Banner from "../components/Banner";
 import Footer from "./Footer";
+import Info from '../components/Info';
+import RoundRobin from '../components/RoundR';
+import Modelo5 from '../components/Modelocincoestados';
+import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
+import Tooltip from 'react-bootstrap/Tooltip';
 
 function App() {
   const intervalId = useRef(null);
@@ -510,20 +515,7 @@ function App() {
                     </div>
                   </Form> */}
                 {/* </Card.Text> */}
-                <button
-                  className="button-27"
-                  role="button"
-                  onClick={() => cargarProcesosNuevoListo()}
-                >
-                  Iniciar
-                </button>{" "}
-                <button
-                  className="button-27"
-                  role="button"
-                  onClick={crearProcesoAleatorio}
-                >
-                  Crear Proceso Aleatorio
-                </button>
+                
               </Card.Body>
             </Card>
           </div>
@@ -532,7 +524,7 @@ function App() {
           <div className="ms-auto">
             <Card style={{ width: "25rem" }}>
               <Card.Body>
-                <Card.Title>Procesos</Card.Title>
+                <Card.Title>Crear Procesos</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">
                   Ingrese los siguientes procesos
                 </Card.Subtitle>
@@ -587,9 +579,16 @@ function App() {
                   <div>
                     <button className="button-27" role="button" type="submit">
                       Guardar
-                    </button>
+                    </button>                    
                   </div>
                 </Form>
+                <button
+                  className="button-27"
+                  role="button"
+                  onClick={crearProcesoAleatorio}
+                >
+                  Aleatorio
+                </button>
 
                 {/* CÓDIGO QUE VA DESPUÉS DEL Card.Subtitle DE Procesos */}
                 {/* <Card.Text> */}
@@ -653,6 +652,16 @@ function App() {
           </div>
         </Stack>
 
+        <div className="botones">
+          <button
+                  className="button-27"
+                  role="button"
+                  onClick={() => cargarProcesosNuevoListo()}
+                >
+                  Iniciar
+                </button>              
+          </div>
+
         {/*Procesos-Bloqueo-final */}
         <div className="Procesos-bloqueo-final">
           {/*Listo y en ejecucion */}
@@ -702,7 +711,7 @@ function App() {
               </Card.Body>
             </Card>
           </div>
-
+          
           <Card style={{ widows: "100" }} className="Bloqueos-Card">
             <Card.Body>
               <Card.Title>Bloqueados</Card.Title>
@@ -763,6 +772,9 @@ function App() {
           </div>
         </div>
       </div>
+      <RoundRobin/>
+      <Modelo5/>
+      <Info/>
       <Footer />
     </div>
   );

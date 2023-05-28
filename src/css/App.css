@@ -5,8 +5,77 @@
   background-attachment: fixed;
   background-size:cover;
   text-align: center;
+  display: flex;
+  flex-direction: row;
+  flex-direction: column;
+  justify-content: center;
+   
+}
+.botones{
+  display: flex;
+  flex-direction:row;
+  flex-direction: end;  
+  font-size: 25px;
 }
 
+.App-info{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: stretch;
+  background-color: white;
+  opacity: 95%;
+}
+.App-titulo h1{
+ font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+ color: blue;
+ padding-top: 1%;
+ font-style: oblique;
+}
+.fondo-info{
+  background-color: white;
+  opacity: 95%;
+}
+.App-RR{
+  background-color: white;
+  opacity: 80%;
+}
+
+.App-RR p{
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 18px;
+}
+
+.App-RR h1{
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-style: italic;
+}
+
+.App-RR h6{
+  font-family: 'Times New Roman', Times, serif;
+  font-style: italic;
+}
+
+
+.Card-info{
+  margin-left: 3%;
+  margin-right: 3%;
+}
+
+.App-Info1{
+  display: flex;
+  flex-direction: row;
+  margin: 2%;
+}
+.App-Info2{
+  display: flex;
+  flex-direction: row;
+  margin: 2%;
+}
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -37,8 +106,11 @@
 }
 
 .Img-carrusel{
+  display: flex;
+  justify-content: center;
+  align-items: center;
   width: 1400px;
-  height: 300px;
+  height: 400px;
 }
 .App-he{
   background-color: #26272b;
@@ -93,11 +165,11 @@ div {
 }
 .site-footer
 {
-  background-color:#26272b;
+  background-color:#100f10;
   padding:45px 0 20px;
   font-size:15px;
   line-height:24px;
-  color:#737373;
+  color:#ffffff;
 }
 
 .site-footer hr.small
@@ -114,11 +186,11 @@ div {
 }
 .site-footer a
 {
-  color:#737373;
+  color:#877272;
 }
 .site-footer a:hover
 {
-  color:#3366cc;
+  color:#17181a;
   text-decoration:none;
 }
 .footer-links
@@ -136,7 +208,7 @@ div {
 }
 .footer-links a:active,.footer-links a:focus,.footer-links a:hover
 {
-  color:#3366cc;
+  color:#61619a;
   text-decoration:none;
 }
 .footer-links.inline li
